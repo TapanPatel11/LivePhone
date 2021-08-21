@@ -23,9 +23,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(sender:)))
         sceneView.addGestureRecognizer(tapGestureRecognizer)
         
-        // Create the gesture recognizer:
-        //        let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panGesture(_:)))
-        //        sceneView.addGestureRecognizer(panRecognizer)
+        let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panGesture(_:)))
+        sceneView.addGestureRecognizer(panRecognizer)
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
@@ -39,6 +38,49 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     var selectedNode : SCNNode?
     var phoneNode : SCNNode?
+    
+    //store previous coordinates from hittest to compare with current ones
+    var PCoordx: Float = 0.0
+    var PCoordy: Float = 0.0
+    var PCoordz: Float = 0.0
+
+    @objc func panGesture(_ sender:UIPanGestureRecognizer)
+    {
+        switch sender.state {
+            case .began:
+                let hitNode = self.sceneView.hitTest(sender.location(in: self.sceneView),
+                                                     options: nil)
+                self.PCoordx = (hitNode.first?.worldCoordinates.x)!
+                self.PCoordy = (hitNode.first?.worldCoordinates.y)!
+                self.PCoordz = (hitNode.first?.worldCoordinates.z)!
+            case .changed:
+                // when you start to pan in screen with your finger
+                // hittest gives new coordinates of touched location in sceneView
+                // coord-pcoord gives distance to move or distance paned in sceneview
+                let hitNode = sceneView.hitTest(sender.location(in: sceneView), options: nil)
+                if let coordx = hitNode.first?.worldCoordinates.x,
+                    let coordy = hitNode.first?.worldCoordinates.y,
+                    let coordz = hitNode.first?.worldCoordinates.z {
+                    let action = SCNAction.moveBy(x: CGFloat(coordx - PCoordx),
+                                                  y: 0,
+                                                  z: CGFloat(coordz - PCoordz),
+                                                  duration: 0.0)
+                    self.phoneNode?.runAction(action)
+
+                    self.PCoordx = coordx
+                    self.PCoordy = coordy
+                    self.PCoordz = coordz
+                }
+
+                sender.setTranslation(CGPoint.zero, in: self.sceneView)
+            case .ended:
+                self.PCoordx = 0.0
+                self.PCoordy = 0.0
+                self.PCoordz = 0.0
+            default:
+                break
+            }
+    }
     
     
     
@@ -55,11 +97,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         else
         {
             let result = hittest.first!
-            print(result)
+//            print(result)
             _ = result.node.position
             let name = result.node.name
             
-            print(name)
+//            print(name)
         }
         
     }
