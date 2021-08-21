@@ -74,6 +74,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
                 sender.setTranslation(CGPoint.zero, in: self.sceneView)
             case .ended:
+                print(phoneNode?.position)
                 self.PCoordx = 0.0
                 self.PCoordy = 0.0
                 self.PCoordz = 0.0
@@ -193,10 +194,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 let plane = SCNPlane(width: imageAnchor.referenceImage.physicalSize.width, height: imageAnchor.referenceImage.physicalSize.height)
                 plane.firstMaterial?.diffuse.contents = videoScene
                 
-                
+                plane.cornerRadius = 0.001
                 let planeNode = SCNNode(geometry : plane)
-                planeNode.scale.x = 0.8
-                planeNode.scale.y = 0.7
+                planeNode.scale.x = 0.84
+                planeNode.scale.y = 0.72
+                planeNode.position.x = planeNode.position.x - 0.0003
+                planeNode.position.z = planeNode.position.z + 0.001
+
+
                 planeNode.eulerAngles.x = -.pi/2
                 planeNode.name = "HiPhone"
                 
